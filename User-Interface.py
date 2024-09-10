@@ -7,7 +7,6 @@ import cv2
 from sklearn.preprocessing import StandardScaler
 import joblib
 from PIL import Image
-import streamlit as st
 
 # Load the pre-trained model and scaler
 model = joblib.load('knn_age_detection_model.pkl')
@@ -16,7 +15,7 @@ scaler = joblib.load('scaler.pkl')
 def preprocess_image(image):
     """Preprocess the image before making a prediction."""
     img = np.array(image)  # Convert PIL image to NumPy array
-
+    
     # Check if the image is already grayscale
     if len(img.shape) == 3 and img.shape[2] == 3:
         # Convert to grayscale if the image has 3 channels
@@ -31,12 +30,17 @@ def preprocess_image(image):
     img = img.flatten()  # Flatten the image
     img = np.expand_dims(img, axis=0)  # Add batch dimension
     
+    print(f"Processed image shape: {img.shape}")
+    
     # Check shape of img before scaling
     if img.shape[1] != scaler.n_features_in_:
         raise ValueError(f"Image shape {img.shape} does not match scaler's expected shape.")
     
     img = scaler.transform(img)  # Normalize the image
     return img
+
+import streamlit as st
+from PIL import Image
 
 def main():
     st.title("Age Detection System")
