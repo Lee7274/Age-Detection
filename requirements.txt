@@ -1,1 +1,7 @@
-joblib pandas scikit-learn opencv-python
+joblib 
+pandas 
+scikit-learn 
+opencv-python 
+matplotlib
+numpy
+streamlit
