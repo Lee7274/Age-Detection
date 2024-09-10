@@ -4,14 +4,8 @@
 
 import numpy as np
 import cv2
-from sklearn.preprocessing import StandardScaler
-import joblib
 from PIL import Image
 import streamlit as st
-
-# Load the pre-trained model and scaler
-model = joblib.load('knn_age_detection_model.pkl')
-scaler = joblib.load('scaler.pkl')
 
 def preprocess_image(image):
     """Preprocess the image before making a prediction."""
@@ -27,8 +21,7 @@ def preprocess_image(image):
     else:
         raise ValueError("Unexpected image format")
     
-    # Resize to match training input size
-    img = cv2.resize(img, (48, 48))  
+    img = cv2.resize(img, (48, 48))  # Resize to match training input size
     img = img.flatten()  # Flatten the image
     img = np.expand_dims(img, axis=0)  # Add batch dimension
     
@@ -50,12 +43,12 @@ def main():
         # Open the image and convert it to RGB
         image = Image.open(uploaded_file).convert('RGB')
 
-        # Resize image for display (optional, to ensure it's not too big)
-        display_size = (48, 48)  # Adjust size as needed
+        # Resize image for display
+        display_size = (48, 48)  # Adjust this if needed, based on the display size you want
         image = image.resize(display_size)
 
-        # Display the image
-        st.image(image, caption='Uploaded Image', use_column_width=True)
+        # Display the image with a smaller size
+        st.image(image, caption='Uploaded Image', width=150)  # Adjust width as needed
 
         # Process and predict
         try:
