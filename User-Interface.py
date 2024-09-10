@@ -7,6 +7,7 @@ import cv2
 from sklearn.preprocessing import StandardScaler
 import joblib
 from PIL import Image
+import streamlit as st
 
 # Load the pre-trained model and scaler
 model = joblib.load('knn_age_detection_model.pkl')
@@ -36,11 +37,6 @@ def preprocess_image(image):
     
     img = scaler.transform(img)  # Normalize the image
     return img
-
-
-
-import streamlit as st
-from PIL import Image
 
 def main():
     st.title("Age Detection System")
