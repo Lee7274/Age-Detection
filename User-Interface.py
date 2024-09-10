@@ -4,35 +4,23 @@
 
 
 
-
-import numpy as np
-import cv2
-import joblib
-from PIL import Image
-import streamlit as st
-
-# Load the pre-trained model and scaler
-model = joblib.load('knn_age_detection_model.pkl')
-scaler = joblib.load('scaler.pkl')
-
 def preprocess_image(image):
     """Preprocess the image before making a prediction."""
     img = np.array(image)  # Convert PIL image to NumPy array
+    print(f"Original image shape: {img.shape}")
     
-    # Check if the image is already grayscale
+    # Ensure the image is grayscale (1 channel)
     if len(img.shape) == 3 and img.shape[2] == 3:
-        # Convert to grayscale if the image has 3 channels
-        img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+        raise ValueError("Image is not grayscale")
     elif len(img.shape) == 2:
-        # If the image is already grayscale, ensure it's in the correct shape
-        pass
+        pass  # Image is already grayscale
     else:
         raise ValueError("Unexpected image format")
     
-    img = cv2.resize(img, (48, 48, 1))  # Resize to match training input size
+    img = cv2.resize(img, (48, 48))  # Resize to match training input size
     img = img.flatten()  # Flatten the image
     img = np.expand_dims(img, axis=0)  # Add batch dimension
-
+    
     print(f"Processed image shape: {img.shape}")
     
     # Check shape of img before scaling
@@ -42,21 +30,24 @@ def preprocess_image(image):
     img = scaler.transform(img)  # Normalize the image
     return img
 
+
 def main():
     st.title("Age Detection System")
 
     uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 
     if uploaded_file is not None:
-        # Open the image and convert it to RGB
-        image = Image.open(uploaded_file).convert('RGB')
+        # Open the image and convert it to grayscale
+        image = Image.open(uploaded_file).convert('L')
+        st.write(f"Original image size: {image.size}")
 
-        # Resize image for display (ensure display size matches expectations)
+        # Resize image for display (optional, to ensure it's not too big)
         display_size = (48, 48)  # Adjust size as needed
-        image = image.resize(display_size, Image.ANTIALIAS)
+        image = image.resize(display_size)
+        st.write(f"Resized image size: {image.size}")
 
         # Display the image
-        st.image(image, caption='Uploaded Image', width=display_size[0], use_column_width=False)
+        st.image(image, caption='Uploaded Image', use_column_width=True)
 
         # Process and predict
         try:
