@@ -13,9 +13,7 @@ from sklearn.preprocessing import StandardScaler
 # Define the scaler object
 scaler = StandardScaler()
 
-# Assume you have a training dataset (X_train) that you used to train your model
-# Fit the scaler to the training data
-scaler.fit(X_train)
+
 
 def preprocess_image(image):
     """Preprocess the image before making a prediction."""
