@@ -1,7 +1,8 @@
 joblib 
 pandas 
 scikit-learn 
-opencv-python 
+opencv-python-headless
 matplotlib
 numpy
 streamlit
+pillow
