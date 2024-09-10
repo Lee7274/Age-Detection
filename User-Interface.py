@@ -51,7 +51,7 @@ def main():
         image = Image.open(uploaded_file).convert('RGB')
 
         # Resize image for display (optional, to ensure it's not too big)
-        display_size = (200, 200)  # Adjust size as needed
+        display_size = (48, 48)  # Adjust size as needed
         image = image.resize(display_size)
 
         # Display the image
