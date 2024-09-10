@@ -28,7 +28,7 @@ def preprocess_image(image):
         raise ValueError("Unexpected image format")
     
     # Resize to match training input size
-    img = cv2.resize(img, (64, 64))  
+    img = cv2.resize(img, (48, 48))  
     img = img.flatten()  # Flatten the image
     img = np.expand_dims(img, axis=0)  # Add batch dimension
     
