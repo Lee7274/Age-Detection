@@ -3,65 +3,151 @@
 #os.chdir(r'C:\Users\user9\assignment')  # Replace with your actual folder path
 
 
-import numpy as np
 import cv2
+import numpy as np
+import io
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+from flask_socketio import SocketIO, emit
+from tensorflow.keras.models import load_model
+from keras.preprocessing.image import img_to_array
 from PIL import Image
-import streamlit as st
-import pandas as pd
-import joblib
+from ultralytics import YOLO
+import base64
 
-# Load the pre-trained scaler
-scaler = joblib.load('scaler.joblib')
 
-def preprocess_image(image):
-    """Preprocess the image before making a prediction."""
-    img = np.array(image)  # Convert PIL image to NumPy array
-    print(f"Original image shape: {img.shape}")
+app = Flask(__name__)
+app.config['PERMANENT_SESSION_LIFETIME'] = 600 
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 600 
+CORS(app)
+socketio = SocketIO(app, cors_allowed_origins="*")
+
+# Load YOLOv8 model for face detection
+yolo_model = YOLO('yolov8n_face.pt')
+
+# Load the age, gender, and emotion models
+age_model = load_model('knn_age_model.pkl')
+gender_model = load_model('knn_ethnicity_model.pkl')
+emotion_model = load_model('knn_gender_model.pkl')
+
+# Labels on Age, Gender and Emotion to be predicted
+age_ranges = ['1-2', '3-9', '10-20', '21-27', '28-45', '46-65', '66-116']
+gender_ranges = ['male', 'female']
+emotion_ranges = ['Angry','Disgust','Fear','Happy','Neutral', 'Sad', 'Surprise']
+
+def get_face_detections(image):
+    if image is None or not isinstance(image, np.ndarray):
+        raise ValueError("Invalid image array")
     
-    # Ensure the image is grayscale (1 channel)
-    if len(img.shape) == 3 and img.shape[2] == 3:
-        raise ValueError("Image is not grayscale")
-    elif len(img.shape) == 2:
-        pass  # Image is already grayscale
-    else:
-        raise ValueError("Unexpected image format")
+    results = yolo_model(image)
     
-    img = cv2.resize(img, (48, 48))  # Resize to match training input size
-    img = img.flatten()  # Flatten the image
-    img = np.expand_dims(img, axis=0)  # Add batch dimension
+    face_bounding_boxes = []
+    for result in results:
+        for box in result.boxes:
+            x1, y1, x2, y2 = map(int, box.xyxy[0])
+            width = x2 - x1
+            height = y2 - y1
+            face_bounding_boxes.append((x1, y1, width, height))
     
-    print(f"Processed image shape: {img.shape}")
+    print("================================== Boundingbox =====================================")
+    print(face_bounding_boxes)
+    return face_bounding_boxes
+
+
+@app.route('/predict', methods=['POST'])
+def predict():
+    if 'file' not in request.files:
+        return jsonify({"error": "No image file in request"}), 400
     
-    # Check shape of img before scaling
-    if img.shape[1] != scaler.n_features_in_:
-        raise ValueError(f"Image shape {img.shape} does not match scaler's expected shape.")
-    
-    img = scaler.transform(img)  # Normalize the image
-    return img
+    file = request.files['file']
+    image = Image.open(file.stream)
+    image = np.array(image)
+    if image.shape[-1] == 4:
+        image = cv2.cvtColor(image, cv2.COLOR_RGBA2RGB)
 
-def main():
-    uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
+    # Detect faces
+    face_detections = get_face_detections(image)
 
-    if uploaded_file is not None:
-        try:
-            # Open the image and convert it to grayscale
-            image = Image.open(uploaded_file).convert('L')
-            st.write(f"Original image size: {image.size}")
+    gray_image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
 
-            # Resize image for display and prediction
-            display_size = (48, 48)  # Adjust size as needed
-            image = image.resize(display_size)
-            st.write(f"Resized image size: {image.size}")
+    predictions = []
+    i = 0
+    for (x, y, w, h) in face_detections:        
+        face_img = gray_image[y:y+h, x:x+w]
 
-            # Display the image
-            st.image(image, caption='Uploaded Image', use_column_width=True)
+        emotion_img = cv2.resize(face_img, (48, 48), interpolation = cv2.INTER_AREA)
+        if np.sum([emotion_img])!=0:
+                roi = emotion_img.astype('float')/255.0
+                roi = img_to_array(roi)
+                roi = np.expand_dims(roi,axis=0)
 
-            # Process and predict
-            processed_img = preprocess_image(image)
-            prediction = model.predict(processed_img)
-            st.write(f"Predicted Age: {prediction[0]}")
-        except ValueError as e:
-            st.error(f"Error: {e}")
+                prediction = emotion_model.predict(roi)[0]
+                output_emotion=emotion_ranges[prediction.argmax()]
+        
+        gender_img = cv2.resize(face_img, (100, 100), interpolation = cv2.INTER_AREA)
+        gender_image_array = np.array(gender_img)
+        gender_input = np.expand_dims(gender_image_array, axis=0)
+        output_gender=gender_ranges[np.argmax(gender_model.predict(gender_input))]
 
-if __name__ == "__main__":
-    main()
+        age_image = cv2.resize(face_img, (200, 200), interpolation = cv2.INTER_AREA)
+        age_input = age_image.reshape(-1, 200, 200, 1)
+        output_age = age_ranges[np.argmax(age_model.predict(age_input))]
+
+
+        predictions.append({
+            'x': x,
+            'y': y,
+            'width': w,
+            'height': h,
+            'age': output_age,
+            'gender': output_gender,
+            'emotion': output_emotion
+        })
+
+    return jsonify(predictions)
+
+
+@socketio.on('image')
+def handle_image(data):
+    image_data = data['image']
+    image = Image.open(io.BytesIO(base64.b64decode(image_data)))
+    image = np.array(image)
+    if image.shape[-1] == 4:
+        image = cv2.cvtColor(image, cv2.COLOR_RGBA2RGB)
+
+    face_detections = get_face_detections(image)
+
+    gray_image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+
+    predictions = []
+    for (x, y, w, h) in face_detections:
+        face_img = gray_image[y:y+h, x:x+w]
+
+        emotion_img = cv2.resize(face_img, (48, 48), interpolation=cv2.INTER_AREA)
+        emotion_image_array = np.array(emotion_img)
+        emotion_input = np.expand_dims(emotion_image_array, axis=0)
+        output_emotion = emotion_ranges[np.argmax(emotion_model.predict(emotion_input))]
+
+        gender_img = cv2.resize(face_img, (100, 100), interpolation=cv2.INTER_AREA)
+        gender_image_array = np.array(gender_img)
+        gender_input = np.expand_dims(gender_image_array, axis=0)
+        output_gender = gender_ranges[np.argmax(gender_model.predict(gender_input))]
+
+        age_image = cv2.resize(face_img, (200, 200), interpolation=cv2.INTER_AREA)
+        age_input = age_image.reshape(-1, 200, 200, 1)
+        output_age = age_ranges[np.argmax(age_model.predict(age_input))]
+
+        predictions.append({
+            'x': x,
+            'y': y,
+            'width': w,
+            'height': h,
+            'age': output_age,
+            'gender': output_gender,
+            'emotion': output_emotion
+        })
+
+    emit('prediction', predictions)
+
+if __name__ == '__main__':
+    app.run(debug=False)
