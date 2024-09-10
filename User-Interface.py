@@ -8,14 +8,18 @@ import numpy as np
 import cv2
 from PIL import Image
 import streamlit as st
-from sklearn.preprocessing import StandardScaler  # Assuming you're using StandardScaler
 
-# Define the scaler and model
-scaler = StandardScaler()
+from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsRegressor
 
+# Define the scaler
+scaler = StandardScaler()
+
+# Fit the scaler to your data
+scaler.fit(age_gender.csv)
+
 # Define the KNN model
-model = KNeighborsRegressor(n_neighbors=5)  # You can adjust the number of neighbors as needed
+model = KNeighborsRegressor(n_neighbors=5)
 
 def preprocess_image(image):
     """Preprocess the image before making a prediction."""
