@@ -23,7 +23,7 @@ def preprocess_image(image):
     resized_img = cv2.resize(img, (48, 48))
 
     # Flatten the resized image for the model input
-    flattened_img = resized_img.flatten().reshape(1, -1)  # Shape it into (1, 3201)
+    flattened_img = resized_img.flatten().reshape(1, -1)  # Shape it into (1, 2304 or 3201)
 
     # Scale the flattened image using the scaler
     scaled_img = scaler.transform(flattened_img)
@@ -51,4 +51,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
