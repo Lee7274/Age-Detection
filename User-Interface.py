@@ -10,6 +10,12 @@ from PIL import Image
 import streamlit as st
 import pandas as pd
 
+import os 
+# Load the age_gender.csv file
+csv_file_path = os.path.join(os.getcwd(), 'age_gender.csv')
+df = pd.read_csv(csv_file_path)
+
+
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsRegressor
 
