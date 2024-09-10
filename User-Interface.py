@@ -16,23 +16,23 @@ scaler = joblib.load('scaler.pkl')
 def preprocess_image(image):
     """Preprocess the image before making a prediction."""
     img = np.array(image)  # Convert PIL image to NumPy array
-    if len(img.shape) == 3 and img.shape[2] == 3:
+    if len(img.shape) == 3:  # Convert to grayscale if it's a 3-channel image
         img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-    elif len(img.shape) == 2:
-        pass
-    else:
-        raise ValueError("Unexpected image format")
-    
-    img = cv2.resize(img, (48, 48))  # Resize to match training input size
-    img = img.flatten()  # Flatten the image
-    img = np.expand_dims(img, axis=0)  # Add batch dimension
 
-    # Check shape of img before scaling
+    # Ensure image is resized to 48x48, as expected during training
+    img = cv2.resize(img, (48, 48))
+    
+    # Flatten the image and reshape it for the model/scaler
+    img = img.flatten()  # Flatten the image into a 1D array
+    img = np.expand_dims(img, axis=0)  # Add batch dimension
+    
+    # Check shape to match scaler input
     if img.shape[1] != scaler.n_features_in_:
         raise ValueError(f"Image shape {img.shape} does not match scaler's expected shape.")
     
-    img = scaler.transform(img)  # Normalize the image
+    img = scaler.transform(img)  # Normalize the image using the scaler
     return img
+
 
 def main():
     uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
