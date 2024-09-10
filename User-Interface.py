@@ -10,27 +10,6 @@ from PIL import Image
 import streamlit as st
 import pandas as pd
 
-import os 
-# Load the age_gender.csv file
-csv_file_path = os.path.join(os.getcwd(), 'age_gender.csv')
-df = pd.read_csv(csv_file_path)
-
-
-from sklearn.preprocessing import StandardScaler
-from sklearn.neighbors import KNeighborsRegressor
-
-# Load the age_gender.csv file
-df = pd.read_csv('age_gender.csv')
-
-# Define the scaler
-scaler = StandardScaler()
-
-# Fit the scaler to your data
-scaler.fit(df)
-
-# Define the KNN model
-model = KNeighborsRegressor(n_neighbors=5)
-
 def preprocess_image(image):
     """Preprocess the image before making a prediction."""
     img = np.array(image)  # Convert PIL image to NumPy array
