@@ -8,12 +8,10 @@ import cv2
 from PIL import Image
 import streamlit as st
 import pandas as pd
-from sklearn.preprocessing import StandardScaler
+import joblib
 
-# Define the scaler object
-scaler = StandardScaler()
-
-
+# Load the pre-trained scaler
+scaler = joblib.load('scaler.joblib')
 
 def preprocess_image(image):
     """Preprocess the image before making a prediction."""
