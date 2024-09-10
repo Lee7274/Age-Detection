@@ -19,31 +19,32 @@ def preprocess_image(image):
     if len(img.shape) == 3:  # Convert to grayscale if it's a 3-channel image
         img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 
-    # Ensure image is resized to 48x48, as expected during training
-    img = cv2.resize(img, (48, 48))
+    # Resize image to 48x48 for model input
+    resized_img = cv2.resize(img, (48, 48))
     
-    # Flatten the image and reshape it for the model/scaler
-    img = img.flatten()  # Flatten the image into a 1D array
-    img = np.expand_dims(img, axis=0)  # Add batch dimension
+    # Flatten and reshape image for the model/scaler
+    resized_img = resized_img.flatten()
+    resized_img = np.expand_dims(resized_img, axis=0)  # Add batch dimension
     
     # Check shape to match scaler input
-    if img.shape[1] != scaler.n_features_in_:
-        raise ValueError(f"Image shape {img.shape} does not match scaler's expected shape.")
+    if resized_img.shape[1] != scaler.n_features_in_:
+        raise ValueError(f"Image shape {resized_img.shape} does not match scaler's expected shape.")
     
-    img = scaler.transform(img)  # Normalize the image using the scaler
-    return img
-
+    resized_img = scaler.transform(resized_img)  # Normalize using the scaler
+    return resized_img
 
 def main():
     uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 
     if uploaded_file is not None:
+        # Open and display the uploaded image in its original size
         image = Image.open(uploaded_file).convert('L')
-        display_size = (48, 48)
-        image = image.resize(display_size)
+        original_size = image.size  # Keep the original size for display
+        
         st.image(image, caption='Uploaded Image', use_column_width=True)
 
         try:
+            # Preprocess the image (resize to 48x48 for model input but keep original for display)
             processed_img = preprocess_image(image)
             prediction = model.predict(processed_img)
             st.write(f"Predicted Age: {prediction[0]}")
