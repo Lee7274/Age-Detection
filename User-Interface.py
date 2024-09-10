@@ -3,12 +3,19 @@
 #os.chdir(r'C:\Users\user9\assignment')  # Replace with your actual folder path
 
 
-
 import numpy as np
 import cv2
 from PIL import Image
 import streamlit as st
 import pandas as pd
+from sklearn.preprocessing import StandardScaler
+
+# Define the scaler object
+scaler = StandardScaler()
+
+# Assume you have a training dataset (X_train) that you used to train your model
+# Fit the scaler to the training data
+scaler.fit(X_train)
 
 def preprocess_image(image):
     """Preprocess the image before making a prediction."""
