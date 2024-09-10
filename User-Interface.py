@@ -29,8 +29,14 @@ def preprocess_image(image):
     img = cv2.resize(img, (64, 64))  # Resize to match training input size
     img = img.flatten()  # Flatten the image
     img = np.expand_dims(img, axis=0)  # Add batch dimension
+    
+    # Check shape of img before scaling
+    if img.shape[1] != scaler.n_features_in_:
+        raise ValueError(f"Image shape {img.shape} does not match scaler's expected shape.")
+    
     img = scaler.transform(img)  # Normalize the image
     return img
+
 
 
 import streamlit as st
@@ -55,4 +61,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
