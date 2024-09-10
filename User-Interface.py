@@ -8,15 +8,19 @@ import numpy as np
 import cv2
 from PIL import Image
 import streamlit as st
+import pandas as pd
 
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsRegressor
+
+# Load the age_gender.csv file
+df = pd.read_csv('age_gender.csv')
 
 # Define the scaler
 scaler = StandardScaler()
 
 # Fit the scaler to your data
-scaler.fit(age_gender.csv)
+scaler.fit(df)
 
 # Define the KNN model
 model = KNeighborsRegressor(n_neighbors=5)
