@@ -4,6 +4,16 @@
 
 
 
+import numpy as np
+import cv2
+from PIL import Image
+import streamlit as st
+from sklearn.preprocessing import StandardScaler  # Assuming you're using StandardScaler
+
+# Define the scaler and model
+scaler = StandardScaler()
+model = ...  # Define your model here
+
 def preprocess_image(image):
     """Preprocess the image before making a prediction."""
     img = np.array(image)  # Convert PIL image to NumPy array
@@ -30,27 +40,24 @@ def preprocess_image(image):
     img = scaler.transform(img)  # Normalize the image
     return img
 
-
 def main():
-   
-
     uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 
     if uploaded_file is not None:
-        # Open the image and convert it to grayscale
-        image = Image.open(uploaded_file).convert('L')
-        st.write(f"Original image size: {image.size}")
-
-        # Resize image for display (optional, to ensure it's not too big)
-        display_size = (48, 48)  # Adjust size as needed
-        image = image.resize(display_size)
-        st.write(f"Resized image size: {image.size}")
-
-        # Display the image
-        st.image(image, caption='Uploaded Image', use_column_width=True)
-
-        # Process and predict
         try:
+            # Open the image and convert it to grayscale
+            image = Image.open(uploaded_file).convert('L')
+            st.write(f"Original image size: {image.size}")
+
+            # Resize image for display and prediction
+            display_size = (48, 48)  # Adjust size as needed
+            image = image.resize(display_size)
+            st.write(f"Resized image size: {image.size}")
+
+            # Display the image
+            st.image(image, caption='Uploaded Image', use_column_width=True)
+
+            # Process and predict
             processed_img = preprocess_image(image)
             prediction = model.predict(processed_img)
             st.write(f"Predicted Age: {prediction[0]}")
