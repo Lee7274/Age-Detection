@@ -32,7 +32,7 @@ def preprocess_image(image):
 
 
 def main():
-    st.title("Age Detection System")
+   
 
     uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 
