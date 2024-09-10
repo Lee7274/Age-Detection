@@ -1,6 +1,6 @@
-pip install pillow
-import os
-os.chdir(r'C:\Users\user9\assignment')  # Replace with your actual folder path
+#pip install pillow
+#import os
+#os.chdir(r'C:\Users\user9\assignment')  # Replace with your actual folder path
 
 import tkinter as tk
 from tkinter import filedialog, messagebox
