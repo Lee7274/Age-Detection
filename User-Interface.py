@@ -31,10 +31,9 @@ def preprocess_image(image):
     img = cv2.resize(img, (48, 48))  
     img = img.flatten()  # Flatten the image
     img = np.expand_dims(img, axis=0)  # Add batch dimension
-
-    # Debug print
+    
     print(f"Processed image shape: {img.shape}")
-
+    
     # Check shape of img before scaling
     if img.shape[1] != scaler.n_features_in_:
         raise ValueError(f"Image shape {img.shape} does not match scaler's expected shape.")
@@ -50,6 +49,10 @@ def main():
     if uploaded_file is not None:
         # Open the image and convert it to RGB
         image = Image.open(uploaded_file).convert('RGB')
+
+        # Resize image for display (optional, to ensure it's not too big)
+        display_size = (200, 200)  # Adjust size as needed
+        image = image.resize(display_size)
 
         # Display the image
         st.image(image, caption='Uploaded Image', use_column_width=True)
