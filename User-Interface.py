@@ -19,11 +19,11 @@ def preprocess_image(image):
     if len(img.shape) == 3:  # Convert to grayscale if it's a 3-channel image
         img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 
-    # Resize to 48x48 for model input
-    resized_img = cv2.resize(img, (48, 48))
+    # Resize to 96x96 to match the model's input size
+    resized_img = cv2.resize(img, (96, 96))
 
     # Flatten the resized image for the model input
-    flattened_img = resized_img.flatten().reshape(1, -1)  # Shape it into (1, 2304 or 3201)
+    flattened_img = resized_img.flatten().reshape(1, -1)  # Shape it into (1, 12288)
 
     # Scale the flattened image using the scaler
     scaled_img = scaler.transform(flattened_img)
