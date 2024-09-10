@@ -7,6 +7,7 @@ import cv2
 from sklearn.preprocessing import StandardScaler
 import joblib
 from PIL import Image
+import streamlit as st
 
 # Load the pre-trained model and scaler
 model = joblib.load('knn_age_detection_model.pkl')
@@ -22,11 +23,12 @@ def preprocess_image(image):
         img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
     elif len(img.shape) == 2:
         # If the image is already grayscale, ensure it's in the correct shape
-        img = img
+        pass
     else:
         raise ValueError("Unexpected image format")
-
-    img = cv2.resize(img, (64, 64))  # Resize to match training input size
+    
+    # Resize to match training input size
+    img = cv2.resize(img, (64, 64))  
     img = img.flatten()  # Flatten the image
     img = np.expand_dims(img, axis=0)  # Add batch dimension
     
@@ -38,9 +40,6 @@ def preprocess_image(image):
     
     img = scaler.transform(img)  # Normalize the image
     return img
-
-import streamlit as st
-from PIL import Image
 
 def main():
     st.title("Age Detection System")
@@ -55,9 +54,12 @@ def main():
         st.image(image, caption='Uploaded Image', use_column_width=True)
 
         # Process and predict
-        processed_img = preprocess_image(image)
-        prediction = model.predict(processed_img)
-        st.write(f"Predicted Age: {prediction[0]}")
+        try:
+            processed_img = preprocess_image(image)
+            prediction = model.predict(processed_img)
+            st.write(f"Predicted Age: {prediction[0]}")
+        except ValueError as e:
+            st.error(f"Error: {e}")
 
 if __name__ == "__main__":
     main()
