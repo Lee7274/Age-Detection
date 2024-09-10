@@ -12,7 +12,10 @@ from sklearn.preprocessing import StandardScaler  # Assuming you're using Standa
 
 # Define the scaler and model
 scaler = StandardScaler()
-model = ...  # Define your model here
+from sklearn.neighbors import KNeighborsRegressor
+
+# Define the KNN model
+model = KNeighborsRegressor(n_neighbors=5)  # You can adjust the number of neighbors as needed
 
 def preprocess_image(image):
     """Preprocess the image before making a prediction."""
