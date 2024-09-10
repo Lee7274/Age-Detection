@@ -1,6 +1,10 @@
 #pip install pillow
 #import os
 #os.chdir(r'C:\Users\user9\assignment')  # Replace with your actual folder path
+
+
+
+
 import numpy as np
 import cv2
 import joblib
@@ -14,7 +18,7 @@ scaler = joblib.load('scaler.pkl')
 def preprocess_image(image):
     """Preprocess the image before making a prediction."""
     img = np.array(image)  # Convert PIL image to NumPy array
-
+    
     # Check if the image is already grayscale
     if len(img.shape) == 3 and img.shape[2] == 3:
         # Convert to grayscale if the image has 3 channels
@@ -25,10 +29,11 @@ def preprocess_image(image):
     else:
         raise ValueError("Unexpected image format")
     
-    # Resize to match training input size
-    img = cv2.resize(img, (48, 48))  
+    img = cv2.resize(img, (48, 48, 1))  # Resize to match training input size
     img = img.flatten()  # Flatten the image
     img = np.expand_dims(img, axis=0)  # Add batch dimension
+
+    print(f"Processed image shape: {img.shape}")
     
     # Check shape of img before scaling
     if img.shape[1] != scaler.n_features_in_:
@@ -46,12 +51,12 @@ def main():
         # Open the image and convert it to RGB
         image = Image.open(uploaded_file).convert('RGB')
 
-        # Resize image for display (optional, to ensure it's not too big)
-        display_size = (150, 150)  # Adjust size as needed for display
-        image = image.resize(display_size)
+        # Resize image for display (ensure display size matches expectations)
+        display_size = (48, 48)  # Adjust size as needed
+        image = image.resize(display_size, Image.ANTIALIAS)
 
         # Display the image
-        st.image(image, caption='Uploaded Image', use_column_width=True)
+        st.image(image, caption='Uploaded Image', width=display_size[0], use_column_width=False)
 
         # Process and predict
         try:
