@@ -50,12 +50,10 @@ def main():
 
             # Display predictions
             st.write(f"Predicted Age: {prediction[0]}")
+        
+            st.write(f"Predicted Gender: {prediction[1]}")
+            st.write(f"Predicted Ethnicity: {prediction[2]}")
             
-            if len(prediction) > 1:
-                st.write(f"Predicted Gender: {prediction[1]}")
-                st.write(f"Predicted Ethnicity: {prediction[2]}")
-            else:
-                st.write("Only age was predicted. Ensure the model predicts gender and ethnicity.")
         
         except Exception as e:
             st.error(f"Error: {e}")
