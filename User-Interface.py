@@ -9,8 +9,10 @@ import joblib
 from PIL import Image
 import streamlit as st
 
-# Load the pre-trained model and scaler
-model = joblib.load('knn_age_detection_model.pkl')
+# Load the pre-trained models and scaler
+age_model = joblib.load('knn_age_model.pkl')
+ethnicity_model = joblib.load('knn_ethnicity_model.pkl')
+gender_model = joblib.load('knn_gender_model.pkl')
 scaler = joblib.load('scaler.pkl')
 
 def preprocess_image(image):
@@ -42,22 +44,18 @@ def main():
         st.image(image, caption=f'Uploaded Image (original size: {original_size})', use_column_width=True)
 
         try:
-            # Preprocess the image (resize to 48x48 for model input)
+            # Preprocess the image
             processed_img = preprocess_image(image)
-            
-            # Make predictions (assuming the model returns age, gender, and ethnicity)
-            prediction = model.predict(processed_img)
 
-            # Display predictions
-            st.write(f"Predicted Age: {prediction[0]}")
-        
-            if len(prediction) > 1:
-                st.write(f"Predicted Gender: {prediction[1]}")
-                st.write(f"Predicted Ethnicity: {prediction[2]}")
-            else:
-                st.write("Only age was predicted. Ensure the model predicts gender and ethnicity.")
-        
-        
+            # Make predictions for age, ethnicity, and gender
+            age_prediction = age_model.predict(processed_img)
+            ethnicity_prediction = ethnicity_model.predict(processed_img)
+            gender_prediction = gender_model.predict(processed_img)
+
+            # Display the predictions
+            st.write(f"Predicted Age: {age_prediction[0]}")
+            st.write(f"Predicted Ethnicity: {ethnicity_prediction[0]}")
+            st.write(f"Predicted Gender: {gender_prediction[0]}")
         except Exception as e:
             st.error(f"Error: {e}")
 
