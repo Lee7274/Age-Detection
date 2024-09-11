@@ -54,8 +54,8 @@ def main():
 
             # Display the predictions
             st.write(f"Predicted Age: {age_prediction[0]}")
-            st.write(f"Predicted Ethnicity: {ethnicity_prediction[0]}")
-            st.write(f"Predicted Gender: {gender_prediction[0]}")
+            st.write(f"Predicted Ethnicity: {ethnicity_prediction[1]}")
+            st.write(f"Predicted Gender: {gender_prediction[2]}")
         except Exception as e:
             st.error(f"Error: {e}")
 
