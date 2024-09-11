@@ -44,10 +44,22 @@ def main():
         try:
             # Preprocess the image (resize to 48x48 for model input)
             processed_img = preprocess_image(image)
+            
+            # Make predictions (assuming the model returns age, gender, and ethnicity)
             prediction = model.predict(processed_img)
+
+            # Display predictions
             st.write(f"Predicted Age: {prediction[0]}")
+            
+            if len(prediction) > 1:
+                st.write(f"Predicted Gender: {prediction[1]}")
+                st.write(f"Predicted Ethnicity: {prediction[2]}")
+            else:
+                st.write("Only age was predicted. Ensure the model predicts gender and ethnicity.")
+        
         except Exception as e:
             st.error(f"Error: {e}")
 
 if __name__ == "__main__":
     main()
+
