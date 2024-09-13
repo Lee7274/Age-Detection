@@ -4,15 +4,34 @@ import joblib
 from PIL import Image
 import streamlit as st
 import os
-os.chdir(r'C:\Users\user9\assignment')  # Replace with your actual folder path
 
-# Load the pre-trained models and scaler
-age_model = joblib.load('knn_age_model.pkl')
-ethnicity_model = joblib.load('knn_ethnicity_model.pkl')
-gender_model = joblib.load('knn_gender_model.pkl')
-scaler = joblib.load('scaler.pkl')
 
-def preprocess_image(image):
+# Ensure the file paths are correct by checking if the files exist
+def check_files():
+    file_paths = [
+        'knn_age_model.pkl',
+        'knn_ethnicity_model.pkl',
+        'knn_gender_model.pkl',
+        'scaler.pkl'
+    ]
+    for path in file_paths:
+        if not os.path.isfile(path):
+            st.error(f"File not found: {path}")
+            return False
+    return True
+
+# Load the pre-trained models and scaler if files exist
+def load_models_and_scaler():
+    if check_files():
+        age_model = joblib.load('knn_age_model.pkl')
+        ethnicity_model = joblib.load('knn_ethnicity_model.pkl')
+        gender_model = joblib.load('knn_gender_model.pkl')
+        scaler = joblib.load('scaler.pkl')
+        return age_model, ethnicity_model, gender_model, scaler
+    else:
+        return None, None, None, None
+
+def preprocess_image(image, scaler):
     """Preprocess the image before making a prediction."""
     img = np.array(image)  # Convert PIL image to NumPy array
     if len(img.shape) == 3:  # Convert to grayscale if it's a 3-channel image
@@ -22,7 +41,7 @@ def preprocess_image(image):
     resized_img = cv2.resize(img, (96, 128))
 
     # Flatten the resized image for the model input
-    flattened_img = resized_img.flatten().reshape(1, -1)
+    flattened_img = resized_img.flatten().reshape(1, -1)  # Shape it into (1, 12288)
 
     # Scale the flattened image using the scaler
     scaled_img = scaler.transform(flattened_img)
@@ -30,23 +49,27 @@ def preprocess_image(image):
     return scaled_img
 
 def main():
-    st.title("Age, Gender, and Ethnicity Prediction")
+    age_model, ethnicity_model, gender_model, scaler = load_models_and_scaler()
+
+    if age_model is None:
+        st.error("Models or scaler could not be loaded. Please check file paths.")
+        return
 
     uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 
     if uploaded_file is not None:
-        # Open and display the uploaded image
+        # Open and display the uploaded image in its original size
         image = Image.open(uploaded_file).convert('L')
-        original_size = image.size
+        original_size = image.size  # Keep the original size for display
 
         # Display the original image in Streamlit
         st.image(image, caption=f'Uploaded Image (original size: {original_size})', use_column_width=True)
 
         try:
             # Preprocess the image
-            processed_img = preprocess_image(image)
+            processed_img = preprocess_image(image, scaler)
 
-            # Make predictions
+            # Make predictions for age, ethnicity, and gender
             age_prediction = age_model.predict(processed_img)
             ethnicity_prediction = ethnicity_model.predict(processed_img)
             gender_prediction = gender_model.predict(processed_img)
@@ -60,4 +83,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
