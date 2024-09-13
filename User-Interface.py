@@ -3,6 +3,8 @@ import cv2
 import joblib
 from PIL import Image
 import streamlit as st
+import os
+os.chdir(r'C:\Users\user9\assignment')  # Replace with your actual folder path
 
 # Load the pre-trained models and scaler
 age_model = joblib.load('knn_age_model.pkl')
