@@ -3,24 +3,12 @@ import cv2
 import joblib
 from PIL import Image
 import streamlit as st
-import os
-
-# Ensure the current working directory is correct
-os.chdir(r'C:\Users\user9\assignment')
 
 # Load the pre-trained models and scaler
-def load_models_and_scaler():
-    try:
-        age_model = joblib.load('knn_age_model.pkl')
-        ethnicity_model = joblib.load('knn_ethnicity_model.pkl')
-        gender_model = joblib.load('knn_gender_model.pkl')
-        scaler = joblib.load('scaler.pkl')
-        return age_model, ethnicity_model, gender_model, scaler
-    except Exception as e:
-        st.error(f"Error loading models or scaler: {e}")
-        return None, None, None, None
-
-age_model, ethnicity_model, gender_model, scaler = load_models_and_scaler()
+age_model = joblib.load('knn_age_model.pkl')
+ethnicity_model = joblib.load('knn_ethnicity_model.pkl')
+gender_model = joblib.load('knn_gender_model.pkl')
+scaler = joblib.load('scaler.pkl')
 
 def preprocess_image(image):
     """Preprocess the image before making a prediction."""
@@ -28,7 +16,7 @@ def preprocess_image(image):
     if len(img.shape) == 3:  # Convert to grayscale if it's a 3-channel image
         img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 
-    # Resize to 96x128 to match the model's input size
+    # Resize to 96x96 to match the model's input size
     resized_img = cv2.resize(img, (96, 128))
 
     # Flatten the resized image for the model input
@@ -68,3 +56,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
