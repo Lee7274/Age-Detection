@@ -10,12 +10,9 @@ ethnicity_model = joblib.load('knn_ethnicity_model.pkl')
 gender_model = joblib.load('knn_gender_model.pkl')
 scaler = joblib.load('scaler.pkl')
 
-# Define mappings
-ethnicity_mapping = {0: "Ethnicity1", 1: "Ethnicity2", 2: "Ethnicity3"}
-# Define age and gender mappings if needed
-# Example:
-# age_mapping = {0: "0-10", 1: "11-20", 2: "21-30", ...}
-# gender_mapping = {0: "Male", 1: "Female"}
+# Define mappings (update these as per your actual mappings)
+gender_mapping = {0: "Male", 1: "Female"}
+ethnicity_mapping = {0: "White", 1: "Black", 2: "Asian", 4: "Indian"}
 
 def preprocess_image(image):
     """Preprocess the image before making a prediction."""
@@ -50,16 +47,18 @@ def main():
             processed_img = preprocess_image(image)
 
             # Make predictions for age, ethnicity, and gender
-            age_prediction = age_model.predict(processed_img)[0]
-            gender_prediction = gender_model.predict(processed_img)[0]
-            ethnicity_prediction = ethnicity_model.predict(processed_img)[0]
+            age_prediction = age_model.predict(processed_img)
+            ethnicity_prediction = ethnicity_model.predict(processed_img)
+            gender_prediction = gender_model.predict(processed_img)
 
-            # Convert predictions to labels
-            # For example purposes, we assume age and gender are already integer values and don't need mapping
-            # You might need to implement similar mappings for age and gender if they are categorical
-            st.write(f"Predicted Age: {age_prediction}")
-            st.write(f"Predicted Gender: {gender_prediction}")  # Implement gender_mapping if needed
-            st.write(f"Predicted Ethnicity: {ethnicity_mapping.get(ethnicity_prediction, 'Unknown')}")
+            # Convert numeric predictions to strings
+            gender_str = gender_mapping.get(gender_prediction[0], "Unknown")
+            ethnicity_str = ethnicity_mapping.get(ethnicity_prediction[0], "Unknown")
+
+            # Display the predictions
+            st.write(f"Predicted Age: {age_prediction[0]}")
+            st.write(f"Predicted Ethnicity: {ethnicity_str}")
+            st.write(f"Predicted Gender: {gender_str}")
         except Exception as e:
             st.error(f"Error: {e}")
 
