@@ -21,7 +21,7 @@ def preprocess_image(image):
     if len(img.shape) == 3:  # Convert to grayscale if it's a 3-channel image
         img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 
-    # Resize to 96x96 to match the model's input size
+    # Resize to match the model's input size (update if different from training size)
     resized_img = cv2.resize(img, (96, 128))
 
     # Flatten the resized image for the model input
@@ -61,4 +61,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
