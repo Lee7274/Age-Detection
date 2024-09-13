@@ -1,3 +1,0 @@
-knn_age_model.pkl filter=lfs diff=lfs merge=lfs -text
-knn_ethnicity_model.pkl filter=lfs diff=lfs merge=lfs -text
-knn_gender_model.pkl filter=lfs diff=lfs merge=lfs -text
