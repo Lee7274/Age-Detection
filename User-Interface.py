@@ -12,7 +12,7 @@ scaler = joblib.load('scaler.pkl')
 
 # Define mappings (update these as per your actual mappings)
 gender_mapping = {0: "Male", 1: "Female"}
-ethnicity_mapping = {0: "Ethnicity1", 1: "Ethnicity2", 2: "Ethnicity3"}
+ethnicity_mapping = {0: "White", 1: "Black", 2: "Asian" , 4: "Indian"}
 
 def preprocess_image(image):
     """Preprocess the image before making a prediction."""
