@@ -1,8 +1,3 @@
-#pip install pillow
-#import os
-#os.chdir(r'C:\Users\user9\assignment')  # Replace with your actual folder path
-
-
 import numpy as np
 import cv2
 import joblib
@@ -21,11 +16,11 @@ def preprocess_image(image):
     if len(img.shape) == 3:  # Convert to grayscale if it's a 3-channel image
         img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 
-    # Resize to match the model's input size (update if different from training size)
+    # Resize to 96x128 to match the model's input size
     resized_img = cv2.resize(img, (96, 128))
 
     # Flatten the resized image for the model input
-    flattened_img = resized_img.flatten().reshape(1, -1)  # Shape it into (1, 12288)
+    flattened_img = resized_img.flatten().reshape(1, -1)
 
     # Scale the flattened image using the scaler
     scaled_img = scaler.transform(flattened_img)
@@ -33,12 +28,14 @@ def preprocess_image(image):
     return scaled_img
 
 def main():
+    st.title("Age, Gender, and Ethnicity Prediction")
+
     uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 
     if uploaded_file is not None:
-        # Open and display the uploaded image in its original size
+        # Open and display the uploaded image
         image = Image.open(uploaded_file).convert('L')
-        original_size = image.size  # Keep the original size for display
+        original_size = image.size
 
         # Display the original image in Streamlit
         st.image(image, caption=f'Uploaded Image (original size: {original_size})', use_column_width=True)
@@ -47,7 +44,7 @@ def main():
             # Preprocess the image
             processed_img = preprocess_image(image)
 
-            # Make predictions for age, ethnicity, and gender
+            # Make predictions
             age_prediction = age_model.predict(processed_img)
             ethnicity_prediction = ethnicity_model.predict(processed_img)
             gender_prediction = gender_model.predict(processed_img)
@@ -61,5 +58,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
