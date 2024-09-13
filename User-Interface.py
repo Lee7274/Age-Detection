@@ -59,22 +59,3 @@ def main():
 if __name__ == "__main__":
     main()
 
-
-
-import joblib
-import streamlit as st
-
-def load_model(file_path):
-    try:
-        model = joblib.load(file_path)
-        st.success(f"Loaded model from {file_path}")
-        return model
-    except Exception as e:
-        st.error(f"Error loading model from {file_path}: {e}")
-        return None
-
-# Load the models
-age_model = load_model('knn_age_model.pkl')
-ethnicity_model = load_model('knn_ethnicity_model.pkl')
-gender_model = load_model('knn_gender_model.pkl')
-scaler = load_model('scaler.pkl')
