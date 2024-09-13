@@ -10,13 +10,17 @@ ethnicity_model = joblib.load('knn_ethnicity_model.pkl')
 gender_model = joblib.load('knn_gender_model.pkl')
 scaler = joblib.load('scaler.pkl')
 
+# Define mappings
+gender_mapping = {0: "Male", 1: "Female"}  # Update with your actual mappings
+ethnicity_mapping = {0: "Ethnicity1", 1: "Ethnicity2", 2: "Ethnicity3"}  # Update with your actual mappings
+
 def preprocess_image(image):
     """Preprocess the image before making a prediction."""
     img = np.array(image)  # Convert PIL image to NumPy array
     if len(img.shape) == 3:  # Convert to grayscale if it's a 3-channel image
         img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 
-    # Resize to 96x96 to match the model's input size
+    # Resize to 96x128 to match the model's input size
     resized_img = cv2.resize(img, (96, 128))
 
     # Flatten the resized image for the model input
@@ -47,13 +51,16 @@ def main():
             ethnicity_prediction = ethnicity_model.predict(processed_img)
             gender_prediction = gender_model.predict(processed_img)
 
+            # Convert numeric predictions to strings
+            gender_str = gender_mapping.get(gender_prediction[0], "Unknown")
+            ethnicity_str = ethnicity_mapping.get(ethnicity_prediction[0], "Unknown")
+
             # Display the predictions
             st.write(f"Predicted Age: {age_prediction[0]}")
-            st.write(f"Predicted Ethnicity: {ethnicity_prediction[0]}")
-            st.write(f"Predicted Gender: {gender_prediction[0]}")
+            st.write(f"Predicted Ethnicity: {ethnicity_str}")
+            st.write(f"Predicted Gender: {gender_str}")
         except Exception as e:
             st.error(f"Error: {e}")
 
 if __name__ == "__main__":
     main()
-
