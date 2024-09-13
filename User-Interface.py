@@ -10,9 +10,9 @@ ethnicity_model = joblib.load('knn_ethnicity_model.pkl')
 gender_model = joblib.load('knn_gender_model.pkl')
 scaler = joblib.load('scaler.pkl')
 
-# Define mappings
-gender_mapping = {0: "Male", 1: "Female"}  # Update with your actual mappings
-ethnicity_mapping = {0: "Ethnicity1", 1: "Ethnicity2", 2: "Ethnicity3"}  # Update with your actual mappings
+# Define mappings (update these as per your actual mappings)
+gender_mapping = {0: "Male", 1: "Female"}
+ethnicity_mapping = {0: "Ethnicity1", 1: "Ethnicity2", 2: "Ethnicity3"}
 
 def preprocess_image(image):
     """Preprocess the image before making a prediction."""
@@ -20,7 +20,7 @@ def preprocess_image(image):
     if len(img.shape) == 3:  # Convert to grayscale if it's a 3-channel image
         img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 
-    # Resize to 96x128 to match the model's input size
+    # Resize to 96x96 to match the model's input size
     resized_img = cv2.resize(img, (96, 128))
 
     # Flatten the resized image for the model input
