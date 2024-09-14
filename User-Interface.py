@@ -21,21 +21,25 @@ def preprocess_image(image):
     """Preprocess the image before making a prediction."""
     img = np.array(image)  # Convert PIL image to NumPy array
 
+    # Convert to grayscale
+    gray_img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+
     # Detect faces in the image
-    faces = face_cascade.detectMultiScale(img, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+    faces = face_cascade.detectMultiScale(gray_img, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
 
     # Check if no faces were detected
     if len(faces) == 0:
         raise ValueError("No face detected in the image.")
 
-    if len(img.shape) == 3:  # Convert to grayscale if it's a 3-channel image
-        img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+    # Extract the first face region (x, y, w, h) and crop the image
+    x, y, w, h = faces[0]
+    face_img = gray_img[y:y+h, x:x+w]
 
     # Resize to 96x128 to match the model's input size
-    resized_img = cv2.resize(img, (96, 128))
+    resized_img = cv2.resize(face_img, (96, 128))
 
     # Flatten the resized image for the model input
-    flattened_img = resized_img.flatten().reshape(1, -1)  # Shape it into (1, 12288)
+    flattened_img = resized_img.flatten().reshape(1, -1)
 
     # Scale the flattened image using the scaler
     scaled_img = scaler.transform(flattened_img)
@@ -61,10 +65,6 @@ def main():
             age_prediction = age_model.predict(processed_img)
             ethnicity_prediction = ethnicity_model.predict(processed_img)
             gender_prediction = gender_model.predict(processed_img)
-
-            # Check for invalid label values
-            if age_prediction[0] < 0 or age_prediction[0] > 100:
-                raise ValueError("Predicted age is outside a valid range.")
 
             # Convert numeric predictions to strings
             gender_str = gender_mapping.get(gender_prediction[0], "Unknown")
