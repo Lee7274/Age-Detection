@@ -56,7 +56,7 @@ def main():
             ethnicity_str = ethnicity_mapping.get(ethnicity_prediction[0], "Unknown")
 
             # Display the predictions
-            st.write(f"Predicted Age: {age_prediction[1]}")
+            st.write(f"Predicted Age: {age_prediction[0]}")
             st.write(f"Predicted Ethnicity: {ethnicity_str}")
             st.write(f"Predicted Gender: {gender_str}")
         except Exception as e:
