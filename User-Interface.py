@@ -4,7 +4,7 @@ import joblib
 from PIL import Image
 import streamlit as st
 
-# Load the pre-trained models and scaler (assuming these exist)
+# Load the pre-trained models and scaler
 try:
   age_model = joblib.load('knn_age_model.pkl')
   ethnicity_model = joblib.load('knn_ethnicity_model.pkl')
