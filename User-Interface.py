@@ -10,6 +10,9 @@ ethnicity_model = joblib.load('knn_ethnicity_model.pkl')
 gender_model = joblib.load('knn_gender_model.pkl')
 scaler = joblib.load('scaler.pkl')
 
+# Load a pre-trained face detector from OpenCV
+face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+
 # Define mappings (update these as per your actual mappings)
 gender_mapping = {0: "Male", 1: "Female"}
 ethnicity_mapping = {0: "White", 1: "Black", 2: "Asian", 4: "Indian"}
@@ -17,14 +20,22 @@ ethnicity_mapping = {0: "White", 1: "Black", 2: "Asian", 4: "Indian"}
 def preprocess_image(image):
     """Preprocess the image before making a prediction."""
     img = np.array(image)  # Convert PIL image to NumPy array
+
+    # Detect faces in the image
+    faces = face_cascade.detectMultiScale(img, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+
+    # Check if no faces were detected
+    if len(faces) == 0:
+        raise ValueError("No face detected in the image.")
+
     if len(img.shape) == 3:  # Convert to grayscale if it's a 3-channel image
         img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 
-    # Resize to 200x200 to match the model's input size
+    # Resize to 96x128 to match the model's input size
     resized_img = cv2.resize(img, (96, 128))
 
     # Flatten the resized image for the model input
-    flattened_img = resized_img.flatten().reshape(1, -1)  # Shape it into (1, 40000) or (1, 12288)
+    flattened_img = resized_img.flatten().reshape(1, -1)  # Shape it into (1, 12288)
 
     # Scale the flattened image using the scaler
     scaled_img = scaler.transform(flattened_img)
@@ -51,6 +62,10 @@ def main():
             ethnicity_prediction = ethnicity_model.predict(processed_img)
             gender_prediction = gender_model.predict(processed_img)
 
+            # Check for invalid label values
+            if age_prediction[0] < 0 or age_prediction[0] > 100:
+                raise ValueError("Predicted age is outside a valid range.")
+
             # Convert numeric predictions to strings
             gender_str = gender_mapping.get(gender_prediction[0], "Unknown")
             ethnicity_str = ethnicity_mapping.get(ethnicity_prediction[0], "Unknown")
@@ -59,8 +74,10 @@ def main():
             st.write(f"Predicted Age: {age_prediction[0]}")
             st.write(f"Predicted Ethnicity: {ethnicity_str}")
             st.write(f"Predicted Gender: {gender_str}")
+        except ValueError as ve:
+            st.error(f"Error: {ve}")
         except Exception as e:
-            st.error(f"Error: {e}")
+            st.error(f"An error occurred: {e}")
 
 if __name__ == "__main__":
     main()
