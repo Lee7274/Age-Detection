@@ -3,7 +3,7 @@ import cv2
 import joblib
 from PIL import Image
 import streamlit as st
-from sklearn.exceptions import NotFittedError
+from sklearn.exceptions import NotFittedError, ValueError
 
 # Load the pre-trained models and scaler
 try:
@@ -57,17 +57,19 @@ def main():
         age_prediction = age_model.predict(processed_img)
         ethnicity_prediction = ethnicity_model.predict(processed_img)
         gender_prediction = gender_model.predict(processed_img)
+
+        # Convert numeric predictions to strings
+        gender_str = gender_mapping.get(gender_prediction[0], "Unknown")
+        ethnicity_str = ethnicity_mapping.get(ethnicity_prediction[0], "Unknown")
+
+        # Display the predictions
+        st.write(f"Predicted Age: {age_prediction[0]}")
+        st.write(f"Predicted Ethnicity: {ethnicity_str}")
+        st.write(f"Predicted Gender: {gender_str}")
       except NotFittedError:
         st.error("Error: KNN models not fitted. Please train the models first.")
-
-      # Convert numeric predictions to strings
-      gender_str = gender_mapping.get(gender_prediction[0], "Unknown")
-      ethnicity_str = ethnicity_mapping.get(ethnicity_prediction[0], "Unknown")
-
-      # Display the predictions
-      st.write(f"Predicted Age: {age_prediction[0]}")
-      st.write(f"Predicted Ethnicity: {ethnicity_str}")
-      st.write(f"Predicted Gender: {gender_str}")
+      except ValueError as ve:
+        st.error(f"Error: Input data has incorrect dimensions. Ensure it's a 2D array. Error message: {ve}")
     except Exception as e:
       st.error(f"Error: {e}")
 
