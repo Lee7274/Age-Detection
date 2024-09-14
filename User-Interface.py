@@ -14,31 +14,28 @@ scaler = joblib.load('scaler.pkl')
 gender_mapping = {0: "Male", 1: "Female"}
 ethnicity_mapping = {0: "White", 1: "Black", 2: "Asian", 4: "Indian"}
 
-def preprocess_image(image, img_size=(200, 200)):
+def preprocess_image(image):
     """Preprocess the image before making a prediction."""
     img = np.array(image)  # Convert PIL image to NumPy array
     if len(img.shape) == 3:  # Convert to grayscale if it's a 3-channel image
         img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
-    
-    # Resize to the specified dimensions
-    resized_img = cv2.resize(img, img_size)
-    
-    # Flatten the resized image for the model input
-    flattened_img = resized_img.flatten().reshape(1, -1)  # Shape it into (1, features)
-    
-    return flattened_img
 
-def preprocess_and_scale_image(image, scaler, img_size=(200, 200)):
-    """Preprocess and scale the image."""
-    flattened_img = preprocess_image(image, img_size)
+    # Resize to 200x200 to match the model's input size
+    resized_img = cv2.resize(img, (200, 200))
+
+    # Flatten the resized image for the model input
+    flattened_img = resized_img.flatten().reshape(1, -1)  # Shape it into (1, 40000) or (1, 12288)
+
+    # Scale the flattened image using the scaler
     scaled_img = scaler.transform(flattened_img)
+    
     return scaled_img
 
 def main():
     uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 
     if uploaded_file is not None:
-        # Open and display the uploaded image
+        # Open and display the uploaded image in its original size
         image = Image.open(uploaded_file).convert('RGB')  # Ensure color channels
         original_size = image.size  # Keep the original size for display
 
@@ -46,8 +43,8 @@ def main():
         st.image(image, caption=f'Uploaded Image (original size: {original_size})', use_column_width=True)
 
         try:
-            # Preprocess and scale the image
-            processed_img = preprocess_and_scale_image(image, scaler)
+            # Preprocess the image
+            processed_img = preprocess_image(image)
 
             # Make predictions for age, ethnicity, and gender
             age_prediction = age_model.predict(processed_img)
