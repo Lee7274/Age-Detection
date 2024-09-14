@@ -52,9 +52,13 @@ def main():
       processed_img = preprocess_image(image)
 
       # Make predictions for age, ethnicity, and gender
-      age_prediction = age_model.predict(processed_img)
-      ethnicity_prediction = ethnicity_model.predict(processed_img)
-      gender_prediction = gender_model.predict(processed_img)
+       try:
+        age_prediction = age_model.predict(processed_img)
+        ethnicity_prediction = ethnicity_model.predict(processed_img)
+        gender_prediction = gender_model.predict(processed_img)
+      except NotFittedError:
+        st.error("Error: KNN models not fitted. Please train the models first.")
+
 
       # Convert numeric predictions to strings
       gender_str = gender_mapping.get(gender_prediction[0], "Unknown")
