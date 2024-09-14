@@ -21,10 +21,10 @@ def preprocess_image(image):
         img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 
     # Resize to 200x200 to match the model's input size
-    resized_img = cv2.resize(img, (96, 128))
+    resized_img = cv2.resize(img, (200, 200))
 
     # Flatten the resized image for the model input
-    flattened_img = resized_img.flatten().reshape(1, -1)  # Shape it into (1, 40000) or (1, 12288)
+    flattened_img = resized_img.flatten().reshape(1, -1)  # Shape it into (1, 40000) for 200x200
 
     # Scale the flattened image using the scaler
     scaled_img = scaler.transform(flattened_img)
