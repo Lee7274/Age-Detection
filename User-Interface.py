@@ -20,11 +20,11 @@ def preprocess_image(image):
     if len(img.shape) == 3:  # Convert to grayscale if it's a 3-channel image
         img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 
-    # Resize to 96x96 to match the model's input size
+    # Resize to 200x200 to match the model's input size
     resized_img = cv2.resize(img, (200, 200))
 
     # Flatten the resized image for the model input
-    flattened_img = resized_img.flatten().reshape(1, -1)  # Shape it into (1, 12288)
+    flattened_img = resized_img.flatten().reshape(1, -1)  # Shape it into (1, 40000) or (1, 12288)
 
     # Scale the flattened image using the scaler
     scaled_img = scaler.transform(flattened_img)
@@ -36,7 +36,7 @@ def main():
 
     if uploaded_file is not None:
         # Open and display the uploaded image in its original size
-        image = Image.open(uploaded_file).convert('L')
+        image = Image.open(uploaded_file).convert('RGB')  # Ensure color channels
         original_size = image.size  # Keep the original size for display
 
         # Display the original image in Streamlit
