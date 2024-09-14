@@ -10,8 +10,13 @@ def detect_faces(image):
     img = np.array(image)  # Convert PIL image to NumPy array
     gray_img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)  # Convert to grayscale
 
-    # Detect faces in the image
-    faces = face_cascade.detectMultiScale(gray_img, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+    # Adjust face detection parameters to improve sensitivity
+    faces = face_cascade.detectMultiScale(
+        gray_img,
+        scaleFactor=1.05,  # Smaller steps between scales for increased sensitivity
+        minNeighbors=3,    # Decrease to reduce strictness
+        minSize=(30, 30)   # Minimum size of detected face
+    )
     return faces
 
 def main():
