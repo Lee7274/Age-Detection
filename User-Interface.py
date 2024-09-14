@@ -14,7 +14,7 @@ scaler = joblib.load('scaler.pkl')
 gender_mapping = {0: "Male", 1: "Female"}
 ethnicity_mapping = {0: "White", 1: "Black", 2: "Asian", 4: "Indian"}
 
-def preprocess_image(image, img_size=(128, 96)):
+def preprocess_image(image, img_size=(200, 200)):
     """Preprocess the image before making a prediction."""
     img = np.array(image)  # Convert PIL image to NumPy array
     if len(img.shape) == 3:  # Convert to grayscale if it's a 3-channel image
@@ -28,7 +28,7 @@ def preprocess_image(image, img_size=(128, 96)):
     
     return flattened_img
 
-def preprocess_and_scale_image(image, scaler, img_size=(128, 96)):
+def preprocess_and_scale_image(image, scaler, img_size=(200, 200)):
     """Preprocess and scale the image."""
     flattened_img = preprocess_image(image, img_size)
     scaled_img = scaler.transform(flattened_img)
