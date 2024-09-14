@@ -4,65 +4,68 @@ import joblib
 from PIL import Image
 import streamlit as st
 
-# Load the pre-trained models and scaler
-age_model = joblib.load('knn_age_model.pkl')
-ethnicity_model = joblib.load('knn_ethnicity_model.pkl')
-gender_model = joblib.load('knn_gender_model.pkl')
-scaler = joblib.load('scaler.pkl')
+# Load the pre-trained models and scaler (assuming these exist)
+try:
+  age_model = joblib.load('knn_age_model.pkl')
+  ethnicity_model = joblib.load('knn_ethnicity_model.pkl')
+  gender_model = joblib.load('knn_gender_model.pkl')
+  scaler = joblib.load('scaler.pkl')
+except FileNotFoundError:
+  st.error("Error: Pre-trained models or scaler not found!")
+  exit(1)  # Exit the script if models/scaler are missing
 
 # Define mappings (update these as per your actual mappings)
 gender_mapping = {0: "Male", 1: "Female"}
 ethnicity_mapping = {0: "White", 1: "Black", 2: "Asian", 4: "Indian"}
 
 def preprocess_image(image):
-    """Preprocess the image before making a prediction."""
-    img = np.array(image)  # Convert PIL image to NumPy array
-    if len(img.shape) == 3:  # Convert to grayscale if it's a 3-channel image
-        img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+  """Preprocess the image before making a prediction."""
+  img = np.array(image)  # Convert PIL image to NumPy array
 
-    # Resize to 200x200 to match the model's input size
-    resized_img = cv2.resize(img, (96, 128))
+  if len(img.shape) == 3:  # Convert to grayscale if it's a 3-channel image
+    img = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
 
-    # Flatten the resized image for the model input
-    flattened_img = resized_img.flatten().reshape(1, -1)  # Shape it into (1, 40000) or (1, 12288)
+  # Resize to match the model's input size
+  resized_img = cv2.resize(img, (96, 128))
 
-    # Scale the flattened image using the scaler
-    scaled_img = scaler.transform(flattened_img)
-    
-    return scaled_img
+  # Flatten the resized image for the model input
+  flattened_img = resized_img.flatten().reshape(1, -1)  # Shape it into (1, 40000) or (1, 12288)
+
+  # Scale the flattened image using the scaler
+  scaled_img = scaler.transform(flattened_img)
+
+  return scaled_img
 
 def main():
-    uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
+  uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 
-   if uploaded_image is not None:
-    image = Image.open(uploaded_image)
-    st.image(image, caption="Uploaded Image", use_column_width=True)
+  if uploaded_file is not None:
+    try:
+      # Open and display the uploaded image in its original size
+      image = Image.open(uploaded_file).convert('RGB')  # Ensure color channels
+      original_size = image.size  # Keep the original size for display
 
-    faces = detect_face(image)
+      # Display the original image in Streamlit
+      st.image(image, caption=f'Uploaded Image (original size: {original_size})', use_column_width=True)
 
-    if len(faces) == 0:
-        st.write("No face detected in the image.")
-    else:
-        for (x, y, w, h) in faces:
-            face_img = image.crop((x, y, x+w, y+h))
-            img_array = preprocess_image(face_img)
-            st.image(face_img, caption="Detected Face", use_column_width=True)
+      # Preprocess the image
+      processed_img = preprocess_image(image)
 
-            if age_model and gender_model and race_model:
-                age_prediction = age_model.predict(img_array)
-                gender_prediction = gender_model.predict(img_array)
-                race_prediction = race_model.predict(img_array)
+      # Make predictions for age, ethnicity, and gender
+      age_prediction = age_model.predict(processed_img)
+      ethnicity_prediction = ethnicity_model.predict(processed_img)
+      gender_prediction = gender_model.predict(processed_img)
 
-                age_groups = ['0-8', '9-18', '19-39', '40-59', '60+']
-                gender_classes = ['Male', 'Female']
-                race_classes = ['White', 'Black', 'Asian', 'Indian']
+      # Convert numeric predictions to strings
+      gender_str = gender_mapping.get(gender_prediction[0], "Unknown")
+      ethnicity_str = ethnicity_mapping.get(ethnicity_prediction[0], "Unknown")
 
-                predicted_age = age_groups[np.argmax(age_prediction)]
-                predicted_gender = gender_classes[round(gender_prediction[0][0])]
-                predicted_race = race_classes[np.argmax(race_prediction)]
+      # Display the predictions
+      st.write(f"Predicted Age: {age_prediction[0]}")
+      st.write(f"Predicted Ethnicity: {ethnicity_str}")
+      st.write(f"Predicted Gender: {gender_str}")
+    except Exception as e:
+      st.error(f"Error: {e}")
 
-                st.write(f"Predicted Age Group: **{predicted_age}**")
-                st.write(f"Predicted Gender: **{predicted_gender}**")
-                st.write(f"Predicted Race: **{predicted_race}**")
-            else:
-                st.error("One or more models could not be loaded. Please check the model files.")
+if __name__ == "__main__":
+  main()
