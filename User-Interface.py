@@ -34,33 +34,38 @@ def preprocess_image(image):
 def main():
     uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 
-    if uploaded_file is not None:
-        # Open and display the uploaded image in its original size
-        image = Image.open(uploaded_file).convert('RGB')  # Ensure color channels
-        original_size = image.size  # Keep the original size for display
+   if uploaded_image is not None:
+    image = Image.open(uploaded_image)
+    st.image(image, caption="Uploaded Image", use_column_width=True)
 
-        # Display the original image in Streamlit
-        st.image(image, caption=f'Uploaded Image (original size: {original_size})', use_column_width=True)
+    faces = detect_face(image)
 
-        try:
-            # Preprocess the image
-            processed_img = preprocess_image(image)
+    if len(faces) == 0:
+        st.write("No face detected in the image.")
+    else:
+        for (x, y, w, h) in faces:
+            face_img = image.crop((x, y, x+w, y+h))
+            img_array = preprocess_image(face_img)
+            st.image(face_img, caption="Detected Face", use_column_width=True)
 
-            # Make predictions for age, ethnicity, and gender
-            age_prediction = age_model.predict(processed_img)
-            ethnicity_prediction = ethnicity_model.predict(processed_img)
-            gender_prediction = gender_model.predict(processed_img)
+            if age_model and gender_model and race_model:
+                age_prediction = age_model.predict(img_array)
+                gender_prediction = gender_model.predict(img_array)
+                race_prediction = race_model.predict(img_array)
 
-            # Convert numeric predictions to strings
-            gender_str = gender_mapping.get(gender_prediction[0], "Unknown")
-            ethnicity_str = ethnicity_mapping.get(ethnicity_prediction[0], "Unknown")
+                age_groups = ['0-8', '9-18', '19-39', '40-59', '60+']
+                gender_classes = ['Male', 'Female']
+                race_classes = ['White', 'Black', 'Asian', 'Indian']
 
-            # Display the predictions
-            st.write(f"Predicted Age: {age_prediction[0]}")
-            st.write(f"Predicted Ethnicity: {ethnicity_str}")
-            st.write(f"Predicted Gender: {gender_str}")
-        except Exception as e:
-            st.error(f"Error: {e}")
+                predicted_age = age_groups[np.argmax(age_prediction)]
+                predicted_gender = gender_classes[round(gender_prediction[0][0])]
+                predicted_race = race_classes[np.argmax(race_prediction)]
+
+                st.write(f"Predicted Age Group: **{predicted_age}**")
+                st.write(f"Predicted Gender: **{predicted_gender}**")
+                st.write(f"Predicted Race: **{predicted_race}**")
+            else:
+                st.error("One or more models could not be loaded. Please check the model files.")
 
 if __name__ == "__main__":
     main() 
