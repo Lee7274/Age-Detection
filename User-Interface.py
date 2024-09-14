@@ -66,6 +66,3 @@ def main():
                 st.write(f"Predicted Race: **{predicted_race}**")
             else:
                 st.error("One or more models could not be loaded. Please check the model files.")
-
-if __name__ == "__main__":
-    main() 
